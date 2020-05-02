@@ -1,0 +1,26 @@
+{{define "contentBlock"}}
+Поля со знаком * являются обязательными.
+<br><br>
+<form action="{{ .PostURL}}" method="post" onsubmit="document.getElementById('submitbutton').disabled = true">
+    <div class="formline"><label for="author">Автор<sup>*</sup>:</label><input type="text" id="author" name="author" required placeholder="Напишите автора" value="{{.PageData.Author}}">
+        <message>{{.PageData.AuthorError}}</message>
+    </div>
+
+    <div class="formline"><label for="title">Заголовок<sup>*</sup>:</label><input type="text" id="title" name="title" required placeholder="Напишите заголовок" value="{{.PageData.Title}}">
+        <message>{{.PageData.TitleError}}</message>
+    </div>
+
+    <div class="formline"><label for="blogpost">Текст<sup>*</sup>:</label><textarea id="blogpost" name="blogpost" required placeholder="Напишите ваш текст" style="width: 55%; height: 100px">{{.PageData.Content}}</textarea>
+        <message>{{.PageData.TextError}}</message>
+    </div>
+
+    <div class="formline"><input type="submit" value="{{if eq .PostURL "/post/"}}Создать{{else}}Обновить{{end}} запись в блоге"></div>
+</form>
+
+<form action="/deletepost/{{.PageData.ID}}" method="get">
+    <div class="formline"><input type="submit" id="submitbutton" value="Удалить запись"></div>
+</form>
+
+
+
+{{end}}

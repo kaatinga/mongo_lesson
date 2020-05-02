@@ -1,0 +1,23 @@
+{{define "contentBlock"}}
+    <toolbar>
+        <div></div>
+        <div><a href="/post/">Добавить запись в блог</a></div>
+    </toolbar>
+    {{ if .PageData.Paginator.Html}}
+        <p>Страницы: {{.PageData.Paginator.Html}}</p>
+    {{end}}
+    {{range .PageData.Posts}}
+        <h3>{{ .Title}}</h3>
+        <p><i>{{.Author}}</i></p>
+        <p>{{ .Content}}</p>
+        <p><a href="/post/update/{{ .ID.Hex}}">Отредактировать</a> | <a href="/deletepost/{{ .ID.Hex}}">Удалить</a></p>
+        <hr>
+    {{end}}
+
+    {{ if .PageData.Paginator.Html}}
+        <p>Страницы: {{.PageData.Paginator.Html}}</p>
+    {{end}}
+
+    <p>Всего записей в списке: {{.PageData.Total}}</p>
+
+{{end}}

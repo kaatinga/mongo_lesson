@@ -1,0 +1,17 @@
+{{define "authBlock"}}
+<div class='auth'>
+    <form action='/login' method='POST' onsubmit="document.getElementById('submitbutton').disabled = true">
+        <div>
+            <input type='hidden' name='url' value='{{ .URL}}'>
+            <input type='hidden' name='method' value='{{ .Method}}'>
+            <label for='name'>Имя пользователя: </label>
+            <input type='text' id='name' name='name'>
+
+            <label for='password'>Пароль:</label>
+            <input type='password' id='password' name='password'>
+
+            <input type='submit' value='Войти' id="submitbutton" >
+        </div>
+    </form>
+</div>
+{{end}}

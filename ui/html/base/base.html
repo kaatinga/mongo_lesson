@@ -1,0 +1,49 @@
+{{define "base"}}
+
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Учебный блог — {{ .Title}}</title>
+    <link rel="stylesheet" href="/static/css/normalize.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed&display=swap&subset=cyrillic">
+</head>
+
+<body>
+    <header>
+        {{if .MenuList}}<input id="burger" type="checkbox" name="hamb" value="hamb"><label for="burger"><img src="/static/img/close.svg" alt="✖"><span>☰</span></label>{{end}}
+        <a href="/" class="logo" title="Перейти на главную страницу"><img src="/static/img/logo.svg"></a>
+        {{if .MenuList}}
+        <ul class="menu">
+            {{range .MenuList}}
+            <li><a href="{{ .URL}}" {{if .Selected}}class="selected" {{end}}>{{ .Name}}</a></li>{{end}}
+        </ul>
+        {{end}}
+    </header>
+    {{template "authBlock" .}}
+    <main>
+        <h2>{{ .Title}}</h2>
+        {{template "contentBlock" .}}
+    </main>
+    <footer>
+        <div>&copy; Михаил Онищенко aka Kaatinga
+            <p style="color: gray">{{ .Error}}</p>
+        </div>
+        <div>Версия от: {{ .LastModified}}
+            <p style="color: gray">
+                Страница запроса: {{ .URL}}<br>
+                Темплейт: {{ .Template}}<br>
+                Код ответа сервера: {{ .Status}}<br>
+                URL для отправки данных: {{ .PostURL}}</p>
+
+        </div>
+    </footer>
+
+</body>
+
+</html>
+
+{{end}}

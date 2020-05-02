@@ -1,0 +1,40 @@
+{{define "contentBlock"}}
+<toolbar>
+    <div></div>
+    <div><a href='/role'>Добавить роль</a></div>
+</toolbar>
+{{ if .PageData.Paginator.Html}}
+<p>Страницы: {{.PageData.Paginator.Html}}</p>
+{{end}}
+<table>
+    <thead>
+        <tr>
+            <th>Название</th>
+            <th>Журнал событий</th>
+            <th>Пользователи</th>
+            <th>Роли</th>
+            <th>Выпуск лицензий</th>
+            <th>Просмотр лицензий</th>
+            <th>Управление</th>
+        </tr>
+    </thead>
+    {{range .PageData.Roles}}
+    <tr>
+        <td>{{ .Name}}</td>
+        <td><img src="/static/icons/{{ .Log}}.png"></td>
+        <td><img src="/static/icons/{{ .Users}}.png"></td>
+        <td><img src="/static/icons/{{ .Roles}}.png"></td>
+        <td><img src="/static/icons/{{ .IssueLicense}}.png"></td>
+        <td><img src="/static/icons/{{ .ReadLicense}}.png"></td>
+        <td class='icons'><a href="/deleterole/{{.ID}}" title="Удалить роль"><img src="/static/icons/delete_role.png" alt="Удалить"></a>
+            <a href="/role/update/{{.ID}}" title="Редактировать роль"><img src="/static/icons/edit_role.png" alt="Редактировать"></a></td>
+    </tr>
+    {{end}}
+</table>
+{{ if .PageData.Paginator.Html}}
+<p>Страницы: {{.PageData.Paginator.Html}}</p>
+{{end}}
+
+<p>Всего пользователей в списке: {{.PageData.Total}}</p>
+
+{{end}}

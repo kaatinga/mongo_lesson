@@ -1,0 +1,10 @@
+{{define "authBlock"}}
+<div class='auth'>
+    <form action='/logout/{{ .User.Name}}' method='POST'>
+        <div>
+            <label>Добро пожаловать, <b>{{ .User.Name}}</b>.</label>
+            <input type='submit' value='Выйти'>
+        </div>
+    </form>
+</div>
+{{end}}

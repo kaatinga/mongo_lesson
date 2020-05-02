@@ -1,0 +1,39 @@
+{{define "contentBlock"}}
+<toolbar>
+    <div class='datefilter'>Фильтр по дате:
+        <form method='get' action='/log/1'>
+            <input type='date' name='from' value="{{.PageData.From}}">
+            <input type='date' name='to' value="{{.PageData.To}}">
+            <input type='submit' value='Показать'>
+        </form>
+
+    </div>
+</toolbar>
+{{ if .PageData.Paginator.Html}}
+<p>Страницы: {{.PageData.Paginator.Html}}</p>
+{{end}}
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Событие</th>
+            <th>Пользователь</th>
+            <th>Дата</th>
+        </tr>
+    </thead>
+    {{range .PageData.Messages}}
+    <tr>
+        <td>{{ .ID}}</td>
+        <td>{{ .Event}}</td>
+        <td>{{ .Name}}</td>
+        <td>{{ .Date}}</td>
+    </tr>
+    {{end}}
+</table>
+{{ if .PageData.Paginator.Html}}
+<p>Страницы: {{.PageData.Paginator.Html}}</p>
+{{end}}
+
+<p>Всего событий в списке: {{.PageData.Total}}</p>
+
+{{end}}
