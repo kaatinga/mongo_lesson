@@ -1,0 +1,383 @@
+/* Setting variables in order to calculate sizes below */
+
+:root {
+    --containerwidth: 1000px;
+    --footerheight: 80px;
+    --navbarheight: 100px;
+    --mobilemenuitemheight: 60px;
+    --speed: .3s;
+    --space: 20px;
+
+    /* Navbar background color */
+    --navbarcolor: chocolate;
+
+    /* Navbar font and button color */
+    --navbaritemcolor: wheat;
+}
+
+/* Mutual settings for the both, mobile and desktop layouts */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Roboto Condensed', sans-serif;
+}
+
+main,
+footer,
+header,
+.auth {
+    display: flex;
+    width: 100%;
+    max-width: var(--containerwidth);
+}
+
+header {
+    align-items: center;
+    justify-content: space-between;
+    min-height: var(--navbarheight);
+    background: var(--navbarcolor);
+}
+
+main {
+    flex-direction: column;
+    background: var(--navbaritemcolor);
+    padding: var(--space);
+    flex: 1;
+}
+
+footer {
+    min-height: var(--footerheight);
+    color: white;
+    background: black;
+    padding: var(--space);
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    height: var(--navbarheight);
+    z-index: 7;
+}
+
+.logo > img {
+    width: 118px;
+}
+
+.auth {
+    background-color: cornsilk;
+    padding: calc(var(--space) / 2) var(--space);
+}
+
+#name,
+#password {
+    margin-right: calc(var(--space) / 2);
+}
+
+/* Paginator */
+
+page > a {
+    padding: 5px 10px
+}
+
+page > a:hover {
+    background: cornsilk;
+    color: var(--navbarcolor);
+    transition: all var(--speed) ease-out;
+}
+
+.currentpage {
+    background-color: burlywood;
+    padding: 5px 10px
+}
+
+/* Toolbar styles */
+
+toolbar {
+    display: flex;
+    justify-content: space-between;
+    margin: calc(var(--space) / 2) 0;
+}
+
+/* Form styles */
+
+.formline {
+    display: flex;
+    margin: calc(var(--space) / 2) 0;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.formline > label {
+    min-width: 300px;
+}
+
+.formline > input,
+.formline > select {
+    padding: calc(var(--space) / 2);
+}
+
+.formline > message {
+    width: 100%;
+    color: red;
+}
+
+.formline > input[type='checkbox'] {
+    /* Double-sized Checkboxes */
+    -ms-transform: scale(2);
+    /* IE */
+    -moz-transform: scale(2);
+    /* FF */
+    -webkit-transform: scale(2);
+    /* Safari and Chrome */
+    -o-transform: scale(2);
+    /* Opera */
+    transform: scale(2);
+    margin: calc(var(--space)/2);
+}
+
+.datefilter input {
+    padding: 3px calc(var(--space)/2);
+    margin: 0;
+    height: 34px;
+}
+
+/* Table styles */
+
+table {
+    width: 100%;
+    text-align: left;
+    background: white;
+    border-collapse: collapse;
+    border: 5px solid #a69582;
+}
+
+td,
+th {
+    padding: calc(var(--space) / 2) var(--space);
+    border-width: 0px;
+}
+
+tr > .icons {
+    padding: 0 var(--space);
+}
+
+tr > .icons:not(:first-of-type) > a {
+    padding: 0 calc(var(--space) / 2) 0 0;
+}
+
+th {
+    background: #ded4c9;
+}
+
+tr:nth-child(odd) td {
+    background: #f0ece7;
+}
+
+td:not(:first-of-type),
+th:not(:first-of-type) {
+    border-left: 1px solid #a69582;
+}
+
+td:first-of-type,
+th:first-of-type {
+    width: 1%;
+}
+
+.table50 td:first-of-type,
+.table50 th:first-of-type {
+    width: 50%;
+}
+
+/* Stylizing the menu */
+
+.menu {
+    display: flex;
+    list-style-type: none;
+    background: var(--navbarcolor);
+    white-space: nowrap;
+    margin: 0;
+    padding: 0;
+}
+
+.menu > li > a {
+    padding: 0 var(--space);
+    color: var(--navbaritemcolor);
+    display: flex;
+    align-items: center;
+}
+
+.menu > li > a:hover {
+    background: var(--navbaritemcolor);
+    color: var(--navbarcolor);
+    transition: all var(--speed) ease-out;
+}
+
+/* Settings only for the desktop layout */
+
+@media screen and (min-width: 769px) {
+
+    header {
+        padding: 0 var(--space);
+    }
+
+    /* Stylizing the menu */
+
+    .menu {
+        justify-content: flex-end;
+    }
+
+    .menu > li > a {
+        height: var(--navbarheight);
+    }
+
+    /* Stylizing the selected menu item */
+
+    .menu > li > a.selected {
+        background: var(--navbaritemcolor);
+        color: var(--navbarcolor);
+    }
+
+    /* Hiding the burger */
+
+    #burger,
+    #burger + label {
+        display: none;
+    }
+
+    /* Form */
+
+    .formline > input[type='text'],
+    .formline > input[type='email'],
+    .formline > input[type='number'],
+    .formline > select {
+        min-width: 55%;
+    }
+
+}
+
+/* Settings only for the mobile layout */
+
+@media screen and (max-width: 768px) {
+
+    /* Moving the logo to the right side */
+
+    .logo {
+        width: 100%;
+        justify-content: flex-end;
+        position: absolute;
+        align-items: baseline;
+        top: calc((var(--navbarheight) - 80px) / 2);
+        right: var(--space);
+    }
+
+    /* Showing the burger */
+
+    #burger,
+    #burger + label {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        height: var(--navbarheight);
+        top: 0;
+        width: 20%;
+        font-size: 30px;
+    }
+
+    /* Stylizing the burger */
+
+    #burger {
+        opacity: 0;
+        z-index: 9;
+        cursor: pointer;
+    }
+
+    #burger + label > img,
+    #burger + label > span {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        box-shadow: inset 0 0 0 20px rgba(0, 0, 0, 0.1), 0 0 0 10px rgba(0, 0, 0, 0.1);
+        color: var(--navbaritemcolor);
+        transition: var(--speed);
+        z-index: 2;
+        left: var(--space);
+    }
+
+    #burger:not(:checked) + label > img {
+        opacity: 0;
+        transform: scale(0.01, 0.01);
+    }
+
+    #burger:checked + label > img {
+        transition-delay: var(--speed);
+    }
+
+    #burger:checked + label > span {
+        opacity: 0;
+        box-shadow: inset 0 0 0 20px rgba(0, 0, 0, 0.1), 0 0 20px 360px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Stylizing the menu */
+
+    .menu {
+        align-items: baseline;
+        justify-content: flex-start;
+        flex-direction: column;
+        width: 100%;
+        transition: var(--speed);
+        z-index: 5;
+    }
+
+    #burger:checked ~ .menu {
+        height: calc(var(--mobilemenuitemheight)*5);
+        margin-top: var(--navbarheight);
+        box-shadow: 0 240px 90px 120px rgba(0, 0, 0, 0.8);
+    }
+
+    #burger:not(:checked) ~ .menu {
+        height: var(--navbarheight);
+        padding: 35px 0 0 calc(var(--space) + 5px);
+        opacity: 0;
+    }
+
+    .menu > li > a,
+    .menu > li {
+        height: var(--mobilemenuitemheight);
+        width: 100%;
+        transition: var(--speed);
+    }
+
+    #burger:not(:checked) ~ .menu > li > a,
+    #burger:not(:checked) ~ .menu > li {
+        padding: 5px 0;
+        height: 5px;
+        width: calc(var(--space) + 2px);
+    }
+
+    #burger:not(:checked) ~ .menu > li > a {
+        font-size: 5px;
+    }
+
+    /* Form */
+
+    .formline > input[type='text'],
+    .formline > input[type='email'],
+    .formline > input[type='number'],
+    .formline > select {
+        min-width: 100%;
+    }
+
+}
