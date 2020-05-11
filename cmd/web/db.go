@@ -1,24 +1,9 @@
 package main
 
 import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"strconv"
 )
-
-// DeleteFromDB удаляет сущность из базы
-func (hd *HandlerData) DeleteFromDB(what primitive.ObjectID) error {
-
-	postDelete := Post{
-		Mongo: Mongo{
-			ID: what,
-		},
-	}
-	if err := postDelete.Delete(hd.ctx, hd.db); err != nil {
-		return err
-	}
-	return nil
-}
 
 func (p *Paginator) FillOut(currentPage uint16, parameters string, _ *mongo.Database) (err error) {
 

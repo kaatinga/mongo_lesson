@@ -1,6 +1,8 @@
 package main
 
 import (
+	. "./logger"
+	. "./models"
 	"context"
 	"github.com/julienschmidt/httprouter"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -22,79 +24,67 @@ func InitPage(db *mongo.Database, ctx context.Context) Adapter {
 	return func(next httprouter.Handle) httprouter.Handle {
 		return func(w http.ResponseWriter, r *http.Request, actions httprouter.Params) {
 			var hd HandlerData
-			hd.db = db
-			hd.ctx = ctx
+			hd.Db = db
+			hd.Ctx = ctx
 
 			// рендер работает отложенно с проверкой условия
 			defer func() {
 
 				switch {
-				case hd.formID != "" && hd.data.Status == 0: // в случае если параметр не пустой, нужно делать редирект
+				case hd.FormID != "" && hd.Data.Status == 0: // в случае если параметр не пустой, нужно делать редирект
 
-					value := url.QueryEscape(hd.formValue)
+					value := url.QueryEscape(hd.FormValue)
 
-					if hd.whereToRedirect == "" || value == "" {
-						subSubLogRed("Ошибка! Значения пустые")
-						hd.data.setError(500, nil)
-						hd.data.Render(w)
+					if hd.WhereToRedirect == "" || value == "" {
+						SubSubLogRed("Ошибка! Значения пустые")
+						hd.Data.SetError(500, nil)
+						hd.Data.Render(w)
 					}
 
-					subSubLogGreen("Time to redirect!")
+					SubSubLogGreen("Time to redirect!")
 
-					setFormCookie(w, hd.formID, value)
-					urlToRedirect := strings.Join([]string{"/", hd.whereToRedirect, "/", hd.formID, "/", value}, "")
+					setFormCookie(w, hd.FormID, value)
+					urlToRedirect := strings.Join([]string{"/", hd.WhereToRedirect, "/", hd.FormID, "/", value}, "")
 
 					http.Redirect(w, r, urlToRedirect, 303)
 
-				case !hd.noRender: // на случай если файлы хэндлятся, проверяем
+				case !hd.NoRender: // на случай если файлы хэндлятся, проверяем
 
-					subSubLogGreen("Time to render!")
-					hd.data.Render(w)
+					SubSubLogGreen("Time to render!")
+					hd.Data.Render(w)
 
 				}
 			}()
 
-			hd.data.URL = r.URL.String()
-			hd.data.Method = r.Method
+			hd.Data.URL = r.URL.String()
+			hd.Data.Method = r.Method
 
-			if hd.data.Status == 0 {
+			if hd.Data.Status == 0 {
 
-				hd.data.MenuList = make([]MenuData, 0, 3)
-				hd.data.MenuList = []MenuData{
+				hd.Data.MenuList = make([]MenuData, 0, 3)
+				hd.Data.MenuList = []MenuData{
 					0: {"/posts/1", "Блог", false},
 					1: {"/post/", "Новая запись", false},
 					2: {"/log/1", "Журнал событий", false},
 				}
 			}
 
-			hd.data.LastModified = compileDate
+			hd.Data.LastModified = compileDate
 
-			if r.URL.String() == "/" || hd.data.Status == 0 { // если главная страница или не ошибка
+			if r.URL.String() == "/" || hd.Data.Status == 0 { // если главная страница или не ошибка
 				// передаём data используя контекст и запускаем следуюзий хэндлер если всё ок
 				ctx := context.WithValue(r.Context(), "hd", &hd)
 				next(w, r.WithContext(ctx), actions)
 			} else {
-				subSubLogYellow("Следующий хэндлер исключён")
+				SubSubLogYellow("Следующий хэндлер исключён")
 			}
 		}
 	}
 }
 
-type HandlerData struct {
-	db                   *mongo.Database
-	data                 ViewData
-	noRender             bool
-	formID               string
-	formValue            string
-	whereToRedirect      string
-	additionalRedirectID string
-	mainAction           string
-	ctx                  context.Context
-}
-
 // routes
 func SetUpHandlers(m *Middleware) {
-	sublog("Setting up handlers...")
+	SubLog("Setting up handlers...")
 
 	// главная страница
 	m.router.GET("/", Adapt(Welcome, InitPage(m.db, m.ctx)))
@@ -103,7 +93,7 @@ func SetUpHandlers(m *Middleware) {
 	m.router.GET("/post/", Adapt(BlogForm, InitPage(m.db, m.ctx)))
 	m.router.GET("/post/:action/:id", Adapt(BlogForm, InitPage(m.db, m.ctx)))
 	m.router.POST("/editpost/:action/:id", Adapt(ProcessPost, InitPage(m.db, m.ctx)))
-	m.router.POST("/post/:action/:id", Adapt(ProcessPost, InitPage(m.db, m.ctx)))
+	m.router.POST("/post/", Adapt(ProcessPost, InitPage(m.db, m.ctx)))
 	m.router.GET("/deletepost/:id", Adapt(DeletePost, InitPage(m.db, m.ctx)))
 	m.router.GET("/posts/:page", Adapt(ListPosts, InitPage(m.db, m.ctx)))
 

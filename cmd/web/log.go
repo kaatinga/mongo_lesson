@@ -1,6 +1,9 @@
 package main
 
 import (
+	. "./logger"
+	. "./models"
+
 	"github.com/julienschmidt/httprouter"
 	my "github.com/kaatinga/assets"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -15,9 +18,6 @@ type LogList struct {
 }
 
 func (logList *LogList) getLog(_ *mongo.Database) (err error) {
-
-	//
-
 	return nil
 }
 
@@ -28,15 +28,11 @@ type LogMessage struct {
 	Date  string
 }
 
-func (hd *HandlerData) AddToLog(event, author string) {
-	//TODO:
-}
-
 func ListLog(_ http.ResponseWriter, r *http.Request, action httprouter.Params) {
 	hd := r.Context().Value("hd").(*HandlerData)
 
-	sublog("Audit log list is requested")
-	hd.data.Title = "Журнал событий"
+	SubLog("Audit log list is requested")
+	hd.Data.Title = "Журнал событий"
 
 	var logList LogList
 	var err error
@@ -45,28 +41,27 @@ func ListLog(_ http.ResponseWriter, r *http.Request, action httprouter.Params) {
 	getParameters := r.URL.Query()
 	err = logList.PrepareDateFilter(getParameters)
 	if err != nil {
-		hd.data.setError(400, err)
+		hd.Data.SetError(400, err)
 		return
 	}
-	//log.Println(logList.DateFilter)
 
 	logList.Where = logList.Filter.ComposeWhere("")
 
 	currentPage, _ := my.StUint16(action.ByName("page"))
 
-	err = logList.FillOut(currentPage, logList.Filter.getString, (*hd).db)
+	err = logList.FillOut(currentPage, logList.Filter.getString, (*hd).Db)
 	if err != nil {
-		hd.data.setError(503, err)
+		hd.Data.SetError(503, err)
 		return
 	}
 
-	err = logList.getLog((*hd).db)
+	err = logList.getLog((*hd).Db)
 	if err != nil {
-		hd.data.setError(503, err)
+		hd.Data.SetError(503, err)
 		return
 	}
 
 	//добавляем данные о ролях в структуру данных
-	hd.data.PageData = logList
-	hd.data.Template = filepath.Join("..", "ui", "html", "log.html") // темплейт страницы
+	hd.Data.PageData = logList
+	hd.Data.Template = filepath.Join("..", "ui", "html", "log.html") // темплейт страницы
 }
