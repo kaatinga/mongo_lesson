@@ -200,7 +200,7 @@ func (m *Mongo) GetMongoCollectionName() string {
 type Post struct {
 	Mongo   `inline`
 	Title   string `bson:"title"`
-	Author    string `bson:"author"`
+	Author  string `bson:"author"`
 	Content string `bson:"content"`
 }
 
@@ -208,14 +208,20 @@ func (p *Post) GetMongoCollectionName() string {
 	return "posts"
 }
 
-func (p *Post) Insert(ctx context.Context, db *mongo.Database) error {
+func (p *Post) Insert(ctx context.Context, db *mongo.Database) (objectID primitive.ObjectID, err error) {
 	p.ID = primitive.NewObjectID()
+
 	coll := db.Collection(p.GetMongoCollectionName())
-	_, err := coll.InsertOne(ctx, p)
+
+	var result *mongo.InsertOneResult
+	result, err = coll.InsertOne(ctx, p)
 	if err != nil {
-		return err
+		return
 	}
-	return nil
+
+	objectID = result.InsertedID.(primitive.ObjectID)
+
+	return
 }
 
 func GetPost(ctx context.Context, db *mongo.Database, id primitive.ObjectID) (*Post, error) {
@@ -233,10 +239,10 @@ func (p *Post) Update(db *mongo.Database) error {
 
 	opts := options.Update().SetUpsert(true)
 	filter := bson.D{{"_id", p.ID}}
-	update := bson.D{{"$set", bson.D{{"title", p.Title},{"content", p.Content}, {"author",p.Author}}}}
+	update := bson.D{{"$set", bson.D{{"title", p.Title}, {"content", p.Content}, {"author", p.Author}}}}
 	result, err := coll.UpdateOne(context.TODO(), filter, update, opts)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	if result.MatchedCount != 0 {

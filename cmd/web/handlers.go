@@ -169,7 +169,7 @@ func ProcessPost(w http.ResponseWriter, r *http.Request, actions httprouter.Para
 				Author:  blogPost.Author,
 				Content: blogPost.Content,
 			}
-			err = post.Insert(hd.Ctx, hd.Db)
+			_, err = post.Insert(hd.Ctx, hd.Db)
 			if err != nil {
 				hd.Data.SetError(503, err)
 				return
