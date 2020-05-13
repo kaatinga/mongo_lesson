@@ -3,13 +3,10 @@ package models
 import (
 	"context"
 	"fmt"
-<<<<<<< HEAD
+
 	"log"
 	"mongo/logger"
 
-=======
-	"github.com/kaatinga/mongo_lesson/cmd/web/logger"
->>>>>>> origin/master
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

@@ -3,8 +3,11 @@ package main
 import (
 	"context"
 	"errors"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
 	"mongo/logger"
+	"mongo/models"
 	"net"
 	"net/http"
 	"net/url"
@@ -180,7 +183,6 @@ func setFormCookie(w http.ResponseWriter, cookieName, cookieValue string) {
 		Name:     cookieName,
 		Value:    cookieValue,
 		Path:     "/",
-		Expires:  time.Now().Add(5 * time.Minute),
 		MaxAge:   300,                     // 5 минут
 		Secure:   false,                   // yet 'false' as TLS is not used
 		HttpOnly: true,                    // 'true' secures from XSS attacks
@@ -262,4 +264,14 @@ func (p *Paginator) Append(phrase, iString, parameters string, currentPage bool)
 	}
 
 	p.Html = strings.Join([]string{(*p).Html, phrase, "</page>"}, "")
+}
+
+func GetPost(ctx context.Context, db *mongo.Database, id primitive.ObjectID) (*models.Post, error) {
+	var p models.Post
+	coll := db.Collection(p.GetMongoCollectionName())
+	res := coll.FindOne(ctx, bson.M{"_id": id})
+	if err := res.Decode(&p); err != nil {
+		return nil, err
+	}
+	return &p, nil
 }

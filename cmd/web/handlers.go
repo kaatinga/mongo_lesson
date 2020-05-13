@@ -327,7 +327,7 @@ func (post *BlogPost) getData(localDB *mongo.Database, ctx context.Context) (err
 	// чтение
 	tmpPost := &models.Post{}
 
-	tmpPost, err = models.GetPost(ctx, localDB, post.Post.ID)
+	tmpPost, err = GetPost(ctx, localDB, post.Post.ID)
 	if err != nil {
 		return err
 	}
