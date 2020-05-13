@@ -1,14 +1,14 @@
 package main
 
 import (
-	. "./logger"
-	. "./models"
+	"mongo/logger"
+	"mongo/models"
+	"net/http"
+	"path/filepath"
 
 	"github.com/julienschmidt/httprouter"
 	my "github.com/kaatinga/assets"
 	"go.mongodb.org/mongo-driver/mongo"
-	"net/http"
-	"path/filepath"
 )
 
 type LogList struct {
@@ -29,9 +29,9 @@ type LogMessage struct {
 }
 
 func ListLog(_ http.ResponseWriter, r *http.Request, action httprouter.Params) {
-	hd := r.Context().Value("hd").(*HandlerData)
+	hd := r.Context().Value("hd").(*models.HandlerData)
 
-	SubLog("Audit log list is requested")
+	logger.SubLog("Audit log list is requested")
 	hd.Data.Title = "Журнал событий"
 
 	var logList LogList

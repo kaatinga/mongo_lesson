@@ -1,23 +1,24 @@
 package main
 
 import (
-	. "./logger"
-	. "./models"
 	"context"
 	"errors"
+	"log"
+	"mongo/logger"
+	"mongo/models"
+	"net/http"
+	"path/filepath"
+	"strings"
+
 	"github.com/julienschmidt/httprouter"
 	my "github.com/kaatinga/assets"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log"
-	"net/http"
-	"path/filepath"
-	"strings"
 )
 
 // Welcome is the homepage of the service
 func Welcome(_ http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	hd := r.Context().Value("hd").(*HandlerData)
+	hd := r.Context().Value("hd").(*models.HandlerData)
 
 	if hd.Data.Status == 0 {
 		hd.Data.Title = "Добро пожаловать"
@@ -31,7 +32,7 @@ func Welcome(_ http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 func BlogForm(w http.ResponseWriter, r *http.Request, actions httprouter.Params) {
 
 	var (
-		hd   = r.Context().Value("hd").(*HandlerData)
+		hd   = r.Context().Value("hd").(*models.HandlerData)
 		post BlogPost
 	)
 
@@ -46,7 +47,7 @@ func BlogForm(w http.ResponseWriter, r *http.Request, actions httprouter.Params)
 		hex := actions.ByName("id")
 		var err error
 
-		post.ID, err = primitive.ObjectIDFromHex(hex)
+		post.Post.ID, err = primitive.ObjectIDFromHex(hex)
 		if err != nil {
 			hd.Data.SetError(http.StatusBadRequest, errors.New("incorrect blog post id"))
 			return
@@ -70,7 +71,7 @@ func BlogForm(w http.ResponseWriter, r *http.Request, actions httprouter.Params)
 // CreateUpdateUser creates or updates users
 func ProcessPost(w http.ResponseWriter, r *http.Request, actions httprouter.Params) {
 	var (
-		hd       = r.Context().Value("hd").(*HandlerData)
+		hd       = r.Context().Value("hd").(*models.HandlerData)
 		blogPost BlogPost
 		err      error // ошибки
 		ok       bool  // простые ошибки
@@ -78,13 +79,13 @@ func ProcessPost(w http.ResponseWriter, r *http.Request, actions httprouter.Para
 		objectID primitive.ObjectID
 	)
 
-	blogPost.Author = strings.TrimSpace(r.FormValue("author"))
-	blogPost.Title = strings.TrimSpace(r.FormValue("title"))
-	blogPost.Content = strings.TrimSpace(r.FormValue("blogpost"))
+	blogPost.Post.Author = strings.TrimSpace(r.FormValue("author"))
+	blogPost.Post.Title = strings.TrimSpace(r.FormValue("title"))
+	blogPost.Post.Content = strings.TrimSpace(r.FormValue("blogpost"))
 
 	action := actions.ByName("action")
 	if action == "update" {
-		SubLog("Updating a post...")
+		logger.SubLog("Updating a post...")
 
 		hd.Data.Title = editPost
 
@@ -116,7 +117,7 @@ func ProcessPost(w http.ResponseWriter, r *http.Request, actions httprouter.Para
 			return
 		}
 	} else {
-		SubLog("Creating a post...")
+		logger.SubLog("Creating a post...")
 
 		// проверяем есть ли кука для этого запроса
 		_, err = checkFormCookie(w, r, "addPost", "ok")
@@ -131,13 +132,13 @@ func ProcessPost(w http.ResponseWriter, r *http.Request, actions httprouter.Para
 
 	// проверка ошибок которые возвращаются пользователю
 	switch {
-	case len(blogPost.Author) < 5:
+	case len(blogPost.Post.Author) < 5:
 		blogPost.AuthorError = nameTooShort
-	case len(blogPost.Title) < 12:
+	case len(blogPost.Post.Title) < 12:
 		blogPost.TitleError = nameTooShort
-	case len(blogPost.Content) < 32:
+	case len(blogPost.Post.Content) < 32:
 		blogPost.TextError = nameTooShort
-	case !my.CheckName(blogPost.Author):
+	case !my.CheckName(blogPost.Post.Author):
 		blogPost.AuthorError = onlyRussian
 	default: // если ошибок не найдено
 		hd.WhereToRedirect = "afterForm"
@@ -150,13 +151,13 @@ func ProcessPost(w http.ResponseWriter, r *http.Request, actions httprouter.Para
 				hd.Data.SetError(503, err)
 				return
 			}
-			err = hd.UpdateBlogPost(objectID, blogPost.Author, blogPost.Title, blogPost.Content)
+			err = hd.UpdateBlogPost(objectID, blogPost.Post.Author, blogPost.Post.Title, blogPost.Post.Content)
 			if err != nil {
 				hd.Data.SetError(503, err)
 				return
 			}
 
-			hd.AddToLog(strings.Join([]string{"Пользователь<b>", blogPost.Author, "</b>обновил запись с id"}, " "), blogPost.Author)
+			hd.AddToLog(strings.Join([]string{"Пользователь<b>", blogPost.Post.Author, "</b>обновил запись с id"}, " "), blogPost.Post.Author)
 			hd.FormID = "postUpdated"
 			hd.FormValue = hex
 			return
@@ -164,10 +165,10 @@ func ProcessPost(w http.ResponseWriter, r *http.Request, actions httprouter.Para
 		// новый пост
 		default:
 			// запись
-			post := &Post{
-				Title:   blogPost.Title,
-				Author:  blogPost.Author,
-				Content: blogPost.Content,
+			post := &models.Post{
+				Title:   blogPost.Post.Title,
+				Author:  blogPost.Post.Author,
+				Content: blogPost.Post.Content,
 			}
 			_, err = post.Insert(hd.Ctx, hd.Db)
 			if err != nil {
@@ -175,9 +176,9 @@ func ProcessPost(w http.ResponseWriter, r *http.Request, actions httprouter.Para
 				return
 			}
 
-			hd.AddToLog(strings.Join([]string{"В блог добавлена новая запись пользователя:<b>", blogPost.Author, "</b>"}, " "), blogPost.Author)
+			hd.AddToLog(strings.Join([]string{"В блог добавлена новая запись пользователя:<b>", blogPost.Post.Author, "</b>"}, " "), blogPost.Post.Author)
 			hd.FormID = "postCreated"
-			hd.FormValue = blogPost.Author
+			hd.FormValue = blogPost.Post.Author
 			return
 		}
 	}
@@ -196,9 +197,9 @@ func ProcessPost(w http.ResponseWriter, r *http.Request, actions httprouter.Para
 
 // DeletePost deletes a post in the blog
 func DeletePost(w http.ResponseWriter, r *http.Request, actions httprouter.Params) {
-	hd := r.Context().Value("hd").(*HandlerData)
+	hd := r.Context().Value("hd").(*models.HandlerData)
 
-	SubLog("Deleting a blog post...")
+	logger.SubLog("Deleting a blog post...")
 	hd.Data.Title = "Удаление записи в блоге"
 
 	postID, err := primitive.ObjectIDFromHex(actions.ByName("id"))
@@ -222,7 +223,7 @@ func DeletePost(w http.ResponseWriter, r *http.Request, actions httprouter.Param
 // PRG pattern, защита от повторных POST-запросов
 func AfterForm(w http.ResponseWriter, r *http.Request, actions httprouter.Params) {
 	var (
-		hd     = r.Context().Value("hd").(*HandlerData)
+		hd     = r.Context().Value("hd").(*models.HandlerData)
 		id1    = actions.ByName("id1")
 		postID string
 		err    error
@@ -259,12 +260,12 @@ func AfterForm(w http.ResponseWriter, r *http.Request, actions httprouter.Params
 }
 
 type PostList struct {
-	Posts []Post
+	Posts []models.Post
 	Paginator
 }
 
 type BlogPost struct {
-	Post
+	Post models.Post
 	PostErrors
 }
 
@@ -278,9 +279,9 @@ type PostErrors struct {
 
 // ListRoles shows the list of the roles
 func ListPosts(_ http.ResponseWriter, r *http.Request, action httprouter.Params) {
-	hd := r.Context().Value("hd").(*HandlerData)
+	hd := r.Context().Value("hd").(*models.HandlerData)
 
-	SubLog("Post list is requested")
+	logger.SubLog("Post list is requested")
 
 	var err error
 	var postList PostList
@@ -313,7 +314,7 @@ func faviconHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params)
 
 func ErrorStatus(status uint16) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var data ViewData
+		var data models.ViewData
 		data.SetError(status, nil)
 
 		//чертим страницу
@@ -324,9 +325,9 @@ func ErrorStatus(status uint16) http.HandlerFunc {
 func (post *BlogPost) getData(localDB *mongo.Database, ctx context.Context) (err error) {
 
 	// чтение
-	tmpPost := &Post{}
+	tmpPost := &models.Post{}
 
-	tmpPost, err = GetPost(ctx, localDB, post.ID)
+	tmpPost, err = models.GetPost(ctx, localDB, post.Post.ID)
 	if err != nil {
 		return err
 	}

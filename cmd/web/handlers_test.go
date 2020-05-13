@@ -1,14 +1,13 @@
 package main
 
 import (
-	. "./models"
 	"bytes"
 	"context"
-	"github.com/julienschmidt/httprouter"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
+	"mongo/models"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -40,8 +39,8 @@ func TestPost_Insert(t *testing.T) {
 
 	t.Run("insert", func(t *testing.T) {
 
-		p := Post{
-			Mongo:   Mongo{ID: objectID},
+		p := models.Post{
+			Mongo:   models.Mongo{ID: objectID},
 			Title:   "Test",
 			Author:  "Test",
 			Content: "Test",
@@ -60,7 +59,7 @@ func TestHandlerData_Exist(t *testing.T) {
 	var err error
 
 	t.Run("must exist", func(t *testing.T) {
-		var hd HandlerData
+		var hd models.HandlerData
 		hd.Db = db
 		hd.Ctx = ctx
 
@@ -83,7 +82,7 @@ func TestHandlerData_UpdateBlogPost(t *testing.T) {
 	var err error
 
 	t.Run("Must be ok", func(t *testing.T) {
-		var hd HandlerData
+		var hd models.HandlerData
 		hd.Db = db
 
 		err = hd.UpdateBlogPost(objectID, "test_done", "test_done", "test_done")
@@ -99,8 +98,8 @@ func TestPost_Delete(t *testing.T) {
 
 	t.Run("delete", func(t *testing.T) {
 
-		p := Post{
-			Mongo: Mongo{ID: objectID},
+		p := models.Post{
+			Mongo: models.Mongo{ID: objectID},
 		}
 
 		err = p.Delete(ctx, db)
@@ -177,7 +176,7 @@ func TestWelcome(t *testing.T) {
 		rr := httptest.NewRecorder()
 
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			Welcome(w, r, httprouter.Params{})
+			Adapt(Welcome, InitPage(db, ctx))
 		})
 
 		handler.ServeHTTP(rr, req)
