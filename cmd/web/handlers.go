@@ -16,7 +16,22 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// Welcome is the homepage of the service
+// SwaggerJSON is API for Swagger Handler
+// @Description Swagger JSON data for the JS Swagger renderer
+// @Tags swagger
+// @Success 200 {string} string
+// @Failure 500 {string} string
+// @Router /swagger.json [get]
+func SwaggerJSON(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	http.ServeFile(w, r, "./web/docs/swagger.json")
+}
+
+// Welcome is the homepage of the blog
+// @Description shows a welcome page
+// @Tags homepage
+// @Success 200 {string} string
+// @Failure 500 {string} string
+// @Router / [get]
 func Welcome(_ http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	hd := r.Context().Value("hd").(*models.HandlerData)
 
@@ -29,6 +44,11 @@ func Welcome(_ http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 // == Blog handlers ==
 
 // BlogForm shows the blog post form in case of updating or creating a blog post
+// @Description shows the blog post form
+// @Tags blog
+// @Success 200 {string} string
+// @Failure 500 {string} string
+// @Router /post/ [get]
 func BlogForm(w http.ResponseWriter, r *http.Request, actions httprouter.Params) {
 
 	var (

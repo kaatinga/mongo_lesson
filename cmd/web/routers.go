@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/swaggo/http-swagger"
 	"mongo/logger"
 	"mongo/models"
 	"net/http"
@@ -84,11 +85,17 @@ func InitPage(db *mongo.Database, ctx context.Context) Adapter {
 }
 
 // routes
-func SetUpHandlers(m *Middleware) {
+func (m *Middleware) SetUpHandlers() {
 	logger.SubLog("Setting up handlers...")
+
+	// swagger хандлер
+	m.router.HandlerFunc("GET", "/swagger/*filepath", httpSwagger.Handler(httpSwagger.URL("/swagger.json")))
 
 	// главная страница
 	m.router.GET("/", Adapt(Welcome, InitPage(m.db, m.ctx)))
+
+	// swagger
+	m.router.GET("/swagger.json", SwaggerJSON)
 
 	// блог
 	m.router.GET("/post/", Adapt(BlogForm, InitPage(m.db, m.ctx)))

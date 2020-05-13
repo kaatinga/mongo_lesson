@@ -1,0 +1,47 @@
+info:
+  contact: {}
+  license: {}
+paths:
+  /:
+    get:
+      description: shows a welcome page
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - homepage
+  /post/:
+    get:
+      description: shows the blog post form
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - blog
+  /swagger.json:
+    get:
+      description: Swagger JSON data for the JS Swagger renderer
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - swagger
+swagger: "2.0"

@@ -70,7 +70,7 @@ func main() {
 	logger.SubLog("Connection is established!")
 
 	// анонсируем хандлеры
-	SetUpHandlers(server)
+	server.SetUpHandlers()
 
 	webServer := http.Server{
 		Addr:              net.JoinHostPort("", port),
