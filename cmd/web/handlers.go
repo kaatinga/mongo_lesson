@@ -1,8 +1,20 @@
 package main
 
 import (
+<<<<<<< HEAD
 	"context"
 	"errors"
+=======
+	"./logger"
+	"./models"
+	"context"
+	"errors"
+	"github.com/julienschmidt/httprouter"
+	my "github.com/kaatinga/assets"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+>>>>>>> origin/master
 	"log"
 	"mongo/logger"
 	"mongo/models"
@@ -166,9 +178,15 @@ func ProcessPost(w http.ResponseWriter, r *http.Request, actions httprouter.Para
 		default:
 			// запись
 			post := &models.Post{
+<<<<<<< HEAD
 				Title:   blogPost.Post.Title,
 				Author:  blogPost.Post.Author,
 				Content: blogPost.Post.Content,
+=======
+				Title:   blogPost.Title,
+				Author:  blogPost.Author,
+				Content: blogPost.Content,
+>>>>>>> origin/master
 			}
 			_, err = post.Insert(hd.Ctx, hd.Db)
 			if err != nil {
@@ -265,7 +283,11 @@ type PostList struct {
 }
 
 type BlogPost struct {
+<<<<<<< HEAD
 	Post models.Post
+=======
+	models.Post
+>>>>>>> origin/master
 	PostErrors
 }
 
@@ -335,4 +357,14 @@ func (post *BlogPost) getData(localDB *mongo.Database, ctx context.Context) (err
 	post.Post = *tmpPost
 
 	return nil
+}
+
+func GetPost(ctx context.Context, db *mongo.Database, id primitive.ObjectID) (*models.Post, error) {
+	var p models.Post
+	coll := db.Collection(p.GetMongoCollectionName())
+	res := coll.FindOne(ctx, bson.M{"_id": id})
+	if err := res.Decode(&p); err != nil {
+		return nil, err
+	}
+	return &p, nil
 }

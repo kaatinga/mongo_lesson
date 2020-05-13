@@ -1,10 +1,15 @@
 package main
 
 import (
+<<<<<<< HEAD
 	"mongo/logger"
 	"mongo/models"
 	"net/http"
 	"path/filepath"
+=======
+	"github.com/kaatinga/mongo_lesson/cmd/web/logger"
+	"github.com/kaatinga/mongo_lesson/cmd/web/models"
+>>>>>>> origin/master
 
 	"github.com/julienschmidt/httprouter"
 	my "github.com/kaatinga/assets"

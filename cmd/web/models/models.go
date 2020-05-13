@@ -3,9 +3,13 @@ package models
 import (
 	"context"
 	"fmt"
+<<<<<<< HEAD
 	"log"
 	"mongo/logger"
 
+=======
+	"github.com/kaatinga/mongo_lesson/cmd/web/logger"
+>>>>>>> origin/master
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -223,16 +227,6 @@ func (p *Post) Insert(ctx context.Context, db *mongo.Database) (objectID primiti
 	objectID = result.InsertedID.(primitive.ObjectID)
 
 	return
-}
-
-func GetPost(ctx context.Context, db *mongo.Database, id primitive.ObjectID) (*Post, error) {
-	var p Post
-	coll := db.Collection(p.GetMongoCollectionName())
-	res := coll.FindOne(ctx, bson.M{"_id": id})
-	if err := res.Decode(&p); err != nil {
-		return nil, err
-	}
-	return &p, nil
 }
 
 func (p *Post) Update(db *mongo.Database) error {
