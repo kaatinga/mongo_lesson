@@ -28,7 +28,7 @@ func Welcome(_ http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 // == Blog handlers ==
 
-// UserForm shows the user form in case of updating or creating new user
+// BlogForm shows the blog post form in case of updating or creating a blog post
 func BlogForm(w http.ResponseWriter, r *http.Request, actions httprouter.Params) {
 
 	var (
@@ -68,7 +68,7 @@ func BlogForm(w http.ResponseWriter, r *http.Request, actions httprouter.Params)
 	hd.Data.Template = filepath.Join("..", "ui", "html", "post.html") // путь к контенту страницы
 }
 
-// CreateUpdateUser creates or updates users
+// ProcessPost creates or updates post data
 func ProcessPost(w http.ResponseWriter, r *http.Request, actions httprouter.Params) {
 	var (
 		hd       = r.Context().Value("hd").(*models.HandlerData)
@@ -277,7 +277,7 @@ type PostErrors struct {
 
 // == Blog list ==
 
-// ListRoles shows the list of the roles
+// ListPosts shows the list of the posts
 func ListPosts(_ http.ResponseWriter, r *http.Request, action httprouter.Params) {
 	hd := r.Context().Value("hd").(*models.HandlerData)
 
