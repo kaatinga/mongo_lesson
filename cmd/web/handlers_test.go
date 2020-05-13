@@ -112,76 +112,21 @@ func TestPost_Delete(t *testing.T) {
 
 func TestWelcome(t *testing.T) {
 
-	testCases := []string{
-		`
+	var mustBe string
 
-<!DOCTYPE html>
-<html lang="ru">
+	reader := bytes.NewReader([]byte(mustBe))
+	req, _ := http.NewRequest("GET", "/", reader)
+	rr := httptest.NewRecorder()
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Учебный блог — Добро пожаловать</title>
-    <link rel="stylesheet" href="/static/css/normalize.css">
-    <link rel="stylesheet" href="/static/css/style.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed&display=swap&subset=cyrillic">
-</head>
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		Adapt(Welcome, InitPage(db, ctx))
+	})
 
-<body>
-    <header>
-        <input id="burger" type="checkbox" name="hamb" value="hamb"><label for="burger"><img src="/static/img/close.svg" alt="✖"><span>☰</span></label>
-        <a href="/" class="logo" title="Перейти на главную страницу"><img src="/static/img/logo.svg"></a>
-        
-        <ul class="menu">
-            
-            <li><a href="/posts/1" >Блог</a></li>
-            <li><a href="/post/" >Новая запись</a></li>
-            <li><a href="/log/1" >Журнал событий</a></li>
-        </ul>
-        
-    </header>
-    
+	handler.ServeHTTP(rr, req)
 
-    <main>
-        <h2>Добро пожаловать</h2>
-        
-<p>Вы на главной странице блога.</p>
-
-    </main>
-    <footer>
-        <div>&copy; Михаил Онищенко aka Kaatinga
-            <p style="color: gray"></p>
-        </div>
-        <div>Версия от: 12.05.2020
-            <p style="color: gray">
-                Страница запроса: /<br>
-                Темплейт: ..\ui\html\index.html<br>
-                Код ответа сервера: 200<br>
-                URL для отправки данных: </p>
-
-        </div>
-    </footer>
-
-</body>
-
-</html>
-
-`,
+	resp := rr.Body.String()
+	if resp != mustBe {
+		t.Errorf("got %s, excpected %s", mustBe, resp)
 	}
 
-	for _, tcase := range testCases {
-
-		reader := bytes.NewReader([]byte(tcase))
-		req, _ := http.NewRequest("GET", "/", reader)
-		rr := httptest.NewRecorder()
-
-		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			Adapt(Welcome, InitPage(db, ctx))
-		})
-
-		handler.ServeHTTP(rr, req)
-		if resp := rr.Body.String(); resp != tcase {
-			t.Errorf("got %s, excpected %s", tcase, resp)
-		}
-	}
 }
