@@ -1,11 +1,6 @@
 package main
 
 import (
-<<<<<<< HEAD
-=======
-	"github.com/kaatinga/mongo_lesson/cmd/web/logger"
-
->>>>>>> origin/master
 	"context"
 	"errors"
 	"log"
@@ -185,6 +180,7 @@ func setFormCookie(w http.ResponseWriter, cookieName, cookieValue string) {
 		Name:     cookieName,
 		Value:    cookieValue,
 		Path:     "/",
+		Expires:  time.Now().Add(5 * time.Minute),
 		MaxAge:   300,                     // 5 минут
 		Secure:   false,                   // yet 'false' as TLS is not used
 		HttpOnly: true,                    // 'true' secures from XSS attacks

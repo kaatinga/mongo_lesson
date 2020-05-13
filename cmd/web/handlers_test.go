@@ -1,11 +1,6 @@
 package main
 
 import (
-<<<<<<< HEAD
-=======
-	"github.com/kaatinga/mongo_lesson/cmd/web/models"
-
->>>>>>> origin/master
 	"bytes"
 	"context"
 	"go.mongodb.org/mongo-driver/bson/primitive"
