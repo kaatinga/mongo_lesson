@@ -1,12 +1,13 @@
 package main
 
 import (
-	. "./logger"
-	. "./models"
+	"./logger"
+	"./models"
 	"context"
 	"errors"
 	"github.com/julienschmidt/httprouter"
 	my "github.com/kaatinga/assets"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"log"
@@ -17,7 +18,7 @@ import (
 
 // Welcome is the homepage of the service
 func Welcome(_ http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	hd := r.Context().Value("hd").(*HandlerData)
+	hd := r.Context().Value("hd").(*models.HandlerData)
 
 	if hd.Data.Status == 0 {
 		hd.Data.Title = "Добро пожаловать"
@@ -31,7 +32,7 @@ func Welcome(_ http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 func BlogForm(w http.ResponseWriter, r *http.Request, actions httprouter.Params) {
 
 	var (
-		hd   = r.Context().Value("hd").(*HandlerData)
+		hd   = r.Context().Value("hd").(*models.HandlerData)
 		post BlogPost
 	)
 
@@ -70,7 +71,7 @@ func BlogForm(w http.ResponseWriter, r *http.Request, actions httprouter.Params)
 // CreateUpdateUser creates or updates users
 func ProcessPost(w http.ResponseWriter, r *http.Request, actions httprouter.Params) {
 	var (
-		hd       = r.Context().Value("hd").(*HandlerData)
+		hd       = r.Context().Value("hd").(*models.HandlerData)
 		blogPost BlogPost
 		err      error // ошибки
 		ok       bool  // простые ошибки
@@ -84,7 +85,7 @@ func ProcessPost(w http.ResponseWriter, r *http.Request, actions httprouter.Para
 
 	action := actions.ByName("action")
 	if action == "update" {
-		SubLog("Updating a post...")
+		logger.SubLog("Updating a post...")
 
 		hd.Data.Title = editPost
 
@@ -116,7 +117,7 @@ func ProcessPost(w http.ResponseWriter, r *http.Request, actions httprouter.Para
 			return
 		}
 	} else {
-		SubLog("Creating a post...")
+		logger.SubLog("Creating a post...")
 
 		// проверяем есть ли кука для этого запроса
 		_, err = checkFormCookie(w, r, "addPost", "ok")
@@ -164,7 +165,7 @@ func ProcessPost(w http.ResponseWriter, r *http.Request, actions httprouter.Para
 		// новый пост
 		default:
 			// запись
-			post := &Post{
+			post := &models.Post{
 				Title:   blogPost.Title,
 				Author:  blogPost.Author,
 				Content: blogPost.Content,
@@ -196,9 +197,9 @@ func ProcessPost(w http.ResponseWriter, r *http.Request, actions httprouter.Para
 
 // DeletePost deletes a post in the blog
 func DeletePost(w http.ResponseWriter, r *http.Request, actions httprouter.Params) {
-	hd := r.Context().Value("hd").(*HandlerData)
+	hd := r.Context().Value("hd").(*models.HandlerData)
 
-	SubLog("Deleting a blog post...")
+	logger.SubLog("Deleting a blog post...")
 	hd.Data.Title = "Удаление записи в блоге"
 
 	postID, err := primitive.ObjectIDFromHex(actions.ByName("id"))
@@ -222,7 +223,7 @@ func DeletePost(w http.ResponseWriter, r *http.Request, actions httprouter.Param
 // PRG pattern, защита от повторных POST-запросов
 func AfterForm(w http.ResponseWriter, r *http.Request, actions httprouter.Params) {
 	var (
-		hd     = r.Context().Value("hd").(*HandlerData)
+		hd     = r.Context().Value("hd").(*models.HandlerData)
 		id1    = actions.ByName("id1")
 		postID string
 		err    error
@@ -259,12 +260,12 @@ func AfterForm(w http.ResponseWriter, r *http.Request, actions httprouter.Params
 }
 
 type PostList struct {
-	Posts []Post
+	Posts []models.Post
 	Paginator
 }
 
 type BlogPost struct {
-	Post
+	models.Post
 	PostErrors
 }
 
@@ -278,9 +279,9 @@ type PostErrors struct {
 
 // ListRoles shows the list of the roles
 func ListPosts(_ http.ResponseWriter, r *http.Request, action httprouter.Params) {
-	hd := r.Context().Value("hd").(*HandlerData)
+	hd := r.Context().Value("hd").(*models.HandlerData)
 
-	SubLog("Post list is requested")
+	logger.SubLog("Post list is requested")
 
 	var err error
 	var postList PostList
@@ -313,7 +314,7 @@ func faviconHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params)
 
 func ErrorStatus(status uint16) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var data ViewData
+		var data models.ViewData
 		data.SetError(status, nil)
 
 		//чертим страницу
@@ -324,7 +325,7 @@ func ErrorStatus(status uint16) http.HandlerFunc {
 func (post *BlogPost) getData(localDB *mongo.Database, ctx context.Context) (err error) {
 
 	// чтение
-	tmpPost := &Post{}
+	tmpPost := &models.Post{}
 
 	tmpPost, err = GetPost(ctx, localDB, post.ID)
 	if err != nil {
@@ -334,4 +335,14 @@ func (post *BlogPost) getData(localDB *mongo.Database, ctx context.Context) (err
 	post.Post = *tmpPost
 
 	return nil
+}
+
+func GetPost(ctx context.Context, db *mongo.Database, id primitive.ObjectID) (*models.Post, error) {
+	var p models.Post
+	coll := db.Collection(p.GetMongoCollectionName())
+	res := coll.FindOne(ctx, bson.M{"_id": id})
+	if err := res.Decode(&p); err != nil {
+		return nil, err
+	}
+	return &p, nil
 }

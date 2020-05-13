@@ -1,8 +1,8 @@
 package main
 
 import (
-	. "./logger"
-	. "./models"
+	"./logger"
+	"./models"
 	"context"
 	"github.com/julienschmidt/httprouter"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -23,7 +23,7 @@ func Adapt(next httprouter.Handle, adapters ...Adapter) httprouter.Handle {
 func InitPage(db *mongo.Database, ctx context.Context) Adapter {
 	return func(next httprouter.Handle) httprouter.Handle {
 		return func(w http.ResponseWriter, r *http.Request, actions httprouter.Params) {
-			var hd HandlerData
+			var hd models.HandlerData
 			hd.Db = db
 			hd.Ctx = ctx
 
@@ -36,12 +36,12 @@ func InitPage(db *mongo.Database, ctx context.Context) Adapter {
 					value := url.QueryEscape(hd.FormValue)
 
 					if hd.WhereToRedirect == "" || value == "" {
-						SubSubLogRed("Ошибка! Значения пустые")
+						logger.SubSubLogRed("Ошибка! Значения пустые")
 						hd.Data.SetError(500, nil)
 						hd.Data.Render(w)
 					}
 
-					SubSubLogGreen("Time to redirect!")
+					logger.SubSubLogGreen("Time to redirect!")
 
 					setFormCookie(w, hd.FormID, value)
 					urlToRedirect := strings.Join([]string{"/", hd.WhereToRedirect, "/", hd.FormID, "/", value}, "")
@@ -50,7 +50,7 @@ func InitPage(db *mongo.Database, ctx context.Context) Adapter {
 
 				case !hd.NoRender: // на случай если файлы хэндлятся, проверяем
 
-					SubSubLogGreen("Time to render!")
+					logger.SubSubLogGreen("Time to render!")
 					hd.Data.Render(w)
 
 				}
@@ -61,8 +61,8 @@ func InitPage(db *mongo.Database, ctx context.Context) Adapter {
 
 			if hd.Data.Status == 0 {
 
-				hd.Data.MenuList = make([]MenuData, 0, 3)
-				hd.Data.MenuList = []MenuData{
+				hd.Data.MenuList = make([]models.MenuData, 0, 3)
+				hd.Data.MenuList = []models.MenuData{
 					0: {"/posts/1", "Блог", false},
 					1: {"/post/", "Новая запись", false},
 					2: {"/log/1", "Журнал событий", false},
@@ -76,7 +76,7 @@ func InitPage(db *mongo.Database, ctx context.Context) Adapter {
 				ctx := context.WithValue(r.Context(), "hd", &hd)
 				next(w, r.WithContext(ctx), actions)
 			} else {
-				SubSubLogYellow("Следующий хэндлер исключён")
+				logger.SubSubLogYellow("Следующий хэндлер исключён")
 			}
 		}
 	}
@@ -84,7 +84,7 @@ func InitPage(db *mongo.Database, ctx context.Context) Adapter {
 
 // routes
 func SetUpHandlers(m *Middleware) {
-	SubLog("Setting up handlers...")
+	logger.SubLog("Setting up handlers...")
 
 	// главная страница
 	m.router.GET("/", Adapt(Welcome, InitPage(m.db, m.ctx)))

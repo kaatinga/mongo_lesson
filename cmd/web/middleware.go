@@ -1,7 +1,7 @@
 package main
 
 import (
-	. "./logger"
+	"./logger"
 	"context"
 	"github.com/julienschmidt/httprouter"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -33,7 +33,7 @@ func (rw *Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		r.Body = http.MaxBytesReader(w, r.Body, 10000)
 		err := r.ParseForm()
 		if err != nil {
-			SubLogRed("POST data is exceeded the limit")
+			logger.SubLogRed("POST data is exceeded the limit")
 			http.Error(w, http.StatusText(400), 400)
 			return
 		}

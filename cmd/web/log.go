@@ -1,8 +1,8 @@
 package main
 
 import (
-	. "./logger"
-	. "./models"
+	"./logger"
+	"./models"
 
 	"github.com/julienschmidt/httprouter"
 	my "github.com/kaatinga/assets"
@@ -29,9 +29,9 @@ type LogMessage struct {
 }
 
 func ListLog(_ http.ResponseWriter, r *http.Request, action httprouter.Params) {
-	hd := r.Context().Value("hd").(*HandlerData)
+	hd := r.Context().Value("hd").(*models.HandlerData)
 
-	SubLog("Audit log list is requested")
+	logger.SubLog("Audit log list is requested")
 	hd.Data.Title = "Журнал событий"
 
 	var logList LogList

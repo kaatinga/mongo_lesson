@@ -224,16 +224,6 @@ func (p *Post) Insert(ctx context.Context, db *mongo.Database) (objectID primiti
 	return
 }
 
-func GetPost(ctx context.Context, db *mongo.Database, id primitive.ObjectID) (*Post, error) {
-	var p Post
-	coll := db.Collection(p.GetMongoCollectionName())
-	res := coll.FindOne(ctx, bson.M{"_id": id})
-	if err := res.Decode(&p); err != nil {
-		return nil, err
-	}
-	return &p, nil
-}
-
 func (p *Post) Update(db *mongo.Database) error {
 	coll := db.Collection(p.GetMongoCollectionName())
 

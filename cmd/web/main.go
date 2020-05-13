@@ -1,7 +1,7 @@
 package main
 
 import (
-	. "./logger"
+	"./logger"
 
 	"context"
 	"errors"
@@ -25,12 +25,12 @@ const (
 	port             = "3333"
 
 	// все фразы тут
-	newPost     = "Создание новой записи в блоге"
-	editPost    = "Редактирование записи в блоге"
+	newPost  = "Создание новой записи в блоге"
+	editPost = "Редактирование записи в блоге"
 
 	// Ошибки
-	nameTooShort      = "Введённая строка слишком короткая"
-	onlyRussian       = "Только русские буквы и пробел разрешены"
+	nameTooShort = "Введённая строка слишком короткая"
+	onlyRussian  = "Только русские буквы и пробел разрешены"
 )
 
 var (
@@ -64,20 +64,20 @@ func main() {
 	}
 
 	server.db = client.Database("blog")
-	SubLog("Connection is established!")
+	logger.SubLog("Connection is established!")
 
 	// анонсируем хандлеры
 	SetUpHandlers(server)
 
 	webServer := http.Server{
-		Addr:    net.JoinHostPort("", port),
-		Handler: server,
+		Addr:              net.JoinHostPort("", port),
+		Handler:           server,
 		ReadTimeout:       1 * time.Minute,
 		ReadHeaderTimeout: 15 * time.Second,
 		WriteTimeout:      1 * time.Minute,
 	}
 
-	SubLog("Launching the service on the port:", port, "...")
+	logger.SubLog("Launching the service on the port:", port, "...")
 	go func() {
 		err = webServer.ListenAndServe()
 		if err != nil {
@@ -85,7 +85,7 @@ func main() {
 		}
 	}()
 
-	Subsublog("The server was launched!")
+	logger.Subsublog("The server was launched!")
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
@@ -168,19 +168,18 @@ func (filter *Filter) ComposeWhere(addWhere string) (resultFilter string) {
 		resultFilter = strings.Join([]string{resultFilter, addWhere}, "")
 	}
 
-	Subsublog("A filter is applied to the list")
+	logger.Subsublog("A filter is applied to the list")
 
 	return
 }
 
 func setFormCookie(w http.ResponseWriter, cookieName, cookieValue string) {
 
-	SubSubLogYellow("Устанавливаем временную сессию формы")
+	logger.SubSubLogYellow("Устанавливаем временную сессию формы")
 	formCookie := &http.Cookie{
 		Name:     cookieName,
 		Value:    cookieValue,
 		Path:     "/",
-		Expires:  time.Now().Add(5 * time.Minute),
 		MaxAge:   300,                     // 5 минут
 		Secure:   false,                   // yet 'false' as TLS is not used
 		HttpOnly: true,                    // 'true' secures from XSS attacks
@@ -188,7 +187,7 @@ func setFormCookie(w http.ResponseWriter, cookieName, cookieValue string) {
 	}
 
 	http.SetCookie(w, formCookie)
-	SubSubLogYellow("Сессия формы успешно установлена")
+	logger.SubSubLogYellow("Сессия формы успешно установлена")
 }
 
 func checkFormCookie(w http.ResponseWriter, r *http.Request, cookieName, cookieMustHaveValue string) (string, error) {
@@ -204,7 +203,7 @@ func checkFormCookie(w http.ResponseWriter, r *http.Request, cookieName, cookieM
 		return "", err
 	}
 
-	SubSubLogYellow("A Form Cookie Detected")
+	logger.SubSubLogYellow("A Form Cookie Detected")
 
 	cookieValue, err = url.QueryUnescape(FormCookie.Value)
 	if err != nil {
@@ -216,8 +215,8 @@ func checkFormCookie(w http.ResponseWriter, r *http.Request, cookieName, cookieM
 		return "", err
 	}
 
-	SubSubLogYellow("The cookie form ID (after processing) is", cookieValue)
-	SubSubLogYellow("The cookie form ID (after processing) must be", cookieMustHaveValue)
+	logger.SubSubLogYellow("The cookie form ID (after processing) is", cookieValue)
+	logger.SubSubLogYellow("The cookie form ID (after processing) must be", cookieMustHaveValue)
 
 	if cookieValue != cookieMustHaveValue {
 		return "", errors.New("the Form Cookie is incorrect")
@@ -231,7 +230,7 @@ func checkFormCookie(w http.ResponseWriter, r *http.Request, cookieName, cookieM
 		MaxAge: -1,
 	}
 	http.SetCookie(w, deleteCookie)
-	SubSubLogYellow("Временная сессия формы удалена")
+	logger.SubSubLogYellow("Временная сессия формы удалена")
 
 	return cookieMustHaveValue, nil
 }
