@@ -1,4 +1,4 @@
-module mongolesson
+module github.com/kaatinga/mongo_lesson
 
 go 1.14
 

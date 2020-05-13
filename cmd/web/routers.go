@@ -1,10 +1,10 @@
 package main
 
 import (
-	"./logger"
-	"./models"
 	"context"
 	"github.com/julienschmidt/httprouter"
+	"github.com/kaatinga/mongo_lesson/cmd/web/logger"
+	"github.com/kaatinga/mongo_lesson/cmd/web/models"
 	"go.mongodb.org/mongo-driver/mongo"
 	"net/http"
 	"net/url"

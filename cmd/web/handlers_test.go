@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./models"
+	"github.com/kaatinga/mongo_lesson/cmd/web/models"
 
 	"bytes"
 	"context"

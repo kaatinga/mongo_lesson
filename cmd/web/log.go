@@ -1,8 +1,8 @@
 package main
 
 import (
-	"./logger"
-	"./models"
+	"github.com/kaatinga/mongo_lesson/cmd/web/logger"
+	"github.com/kaatinga/mongo_lesson/cmd/web/models"
 
 	"github.com/julienschmidt/httprouter"
 	my "github.com/kaatinga/assets"

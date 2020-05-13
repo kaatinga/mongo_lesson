@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./logger"
+	"github.com/kaatinga/mongo_lesson/cmd/web/logger"
 
 	"context"
 	"errors"

@@ -1,9 +1,9 @@
 package main
 
 import (
-	"./logger"
 	"context"
 	"github.com/julienschmidt/httprouter"
+	"github.com/kaatinga/mongo_lesson/cmd/web/logger"
 	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 	"net/http"
