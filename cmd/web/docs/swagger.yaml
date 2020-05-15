@@ -4,7 +4,7 @@ info:
 paths:
   /:
     get:
-      description: shows a welcome page
+      description: A sample af a GET request
       responses:
         "200":
           description: OK
@@ -15,13 +15,17 @@ paths:
           schema:
             type: string
       tags:
-      - homepage
+      - API
   /post/:
-    get:
-      description: shows the blog post form
+    post:
+      description: A test API request
       responses:
         "200":
           description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
           schema:
             type: string
         "500":
@@ -29,7 +33,7 @@ paths:
           schema:
             type: string
       tags:
-      - blog
+      - API
   /swagger.json:
     get:
       description: Swagger JSON data for the JS Swagger renderer
