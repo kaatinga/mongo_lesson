@@ -7,9 +7,9 @@
     "paths": {
         "/": {
             "get": {
-                "description": "shows a welcome page",
+                "description": "A sample af a GET request",
                 "tags": [
-                    "homepage"
+                    "API"
                 ],
                 "responses": {
                     "200": {
@@ -28,14 +28,20 @@
             }
         },
         "/post/": {
-            "get": {
-                "description": "shows the blog post form",
+            "post": {
+                "description": "A test API request",
                 "tags": [
-                    "blog"
+                    "API"
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "type": "string"
                         }
