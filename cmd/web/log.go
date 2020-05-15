@@ -31,7 +31,7 @@ type LogMessage struct {
 func ListLog(_ http.ResponseWriter, r *http.Request, action httprouter.Params) {
 	hd := r.Context().Value("hd").(*models.HandlerData)
 
-	logger.SubLog("Audit log list is requested")
+	logger.SubInfo.Println("Audit log list is requested")
 	hd.Data.Title = "Журнал событий"
 
 	var logList LogList

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"log"
 	"mongo/logger"
 	"mongo/models"
 	"net"
@@ -13,6 +12,8 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
+	"reflect"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -25,7 +26,6 @@ import (
 
 const (
 	myFormatDateTime = "02.01.2006 15:04"
-	port             = "3333"
 
 	// все фразы тут
 	newPost  = "Создание новой записи в блоге"
@@ -43,6 +43,14 @@ var (
 
 func main() {
 
+	logger.LoggerInit(os.Stdout) // указываем куда выводить логи
+
+	// Getting environment settings for the network port and all the necessary paths
+	logger.Info.Println("Loading environment settings...")
+
+	var myEnvs EnvironmentSettings
+	myEnvs.load() // Все ошибки проверяются внутри и завершают программу если что не так
+
 	var (
 		err    error
 		server *Middleware
@@ -51,7 +59,7 @@ func main() {
 	// Устанавливаем сдвиг времени
 	moscow, _ = time.LoadLocation("Europe/Moscow")
 
-	log.Println("Starting the web server...")
+	logger.Info.Println("Starting the web server...")
 
 	var ctx context.Context
 	ctx = context.Background()
@@ -61,34 +69,35 @@ func main() {
 
 	// Establishing connection to the database
 	var client *mongo.Client
-	client, err = mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+	client, err = mongo.Connect(ctx, options.Client().ApplyURI(myEnvs.MongoAddress))
 	if err != nil {
-		log.Println("Ошибка установки соединения")
+		logger.SubInfo.Println("Ошибка установки соединения")
+		os.Exit(1)
 	}
 
 	server.db = client.Database("blog")
-	logger.SubLog("Connection is established!")
+	logger.SubInfo.Println("Connection is established!")
 
 	// анонсируем хандлеры
 	server.SetUpHandlers()
 
 	webServer := http.Server{
-		Addr:              net.JoinHostPort("", port),
+		Addr:              net.JoinHostPort("", myEnvs.Port),
 		Handler:           server,
 		ReadTimeout:       1 * time.Minute,
 		ReadHeaderTimeout: 15 * time.Second,
 		WriteTimeout:      1 * time.Minute,
 	}
 
-	logger.SubLog("Launching the service on the port:", port, "...")
+	logger.SubInfo.Println("Launching the service on the port:", myEnvs.Port, "...")
 	go func() {
 		err = webServer.ListenAndServe()
 		if err != nil {
-			log.Println(err)
+			logger.Info.Println(err)
 		}
 	}()
 
-	logger.Subsublog("The server was launched!")
+	logger.SubSubInfo.Println("The server was launched!")
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
@@ -100,7 +109,7 @@ func main() {
 
 	err = webServer.Shutdown(timeout)
 	if err != nil {
-		log.Println(err)
+		logger.Info.Println(err)
 	}
 }
 
@@ -171,14 +180,14 @@ func (filter *Filter) ComposeWhere(addWhere string) (resultFilter string) {
 		resultFilter = strings.Join([]string{resultFilter, addWhere}, "")
 	}
 
-	logger.Subsublog("A filter is applied to the list")
+	logger.SubSubInfo.Println("A filter is applied to the list")
 
 	return
 }
 
 func setFormCookie(w http.ResponseWriter, cookieName, cookieValue string) {
 
-	logger.SubSubLogYellow("Устанавливаем временную сессию формы")
+	logger.Yellow(logger.SubSubInfo, "Устанавливаем временную сессию формы")
 	formCookie := &http.Cookie{
 		Name:     cookieName,
 		Value:    cookieValue,
@@ -190,7 +199,7 @@ func setFormCookie(w http.ResponseWriter, cookieName, cookieValue string) {
 	}
 
 	http.SetCookie(w, formCookie)
-	logger.SubSubLogYellow("Сессия формы успешно установлена")
+	logger.Yellow(logger.SubSubInfo, "Сессия формы успешно установлена")
 }
 
 func checkFormCookie(w http.ResponseWriter, r *http.Request, cookieName, cookieMustHaveValue string) (string, error) {
@@ -206,7 +215,7 @@ func checkFormCookie(w http.ResponseWriter, r *http.Request, cookieName, cookieM
 		return "", err
 	}
 
-	logger.SubSubLogYellow("A Form Cookie Detected")
+	logger.Yellow(logger.SubSubInfo, "A Form Cookie Detected")
 
 	cookieValue, err = url.QueryUnescape(FormCookie.Value)
 	if err != nil {
@@ -218,8 +227,8 @@ func checkFormCookie(w http.ResponseWriter, r *http.Request, cookieName, cookieM
 		return "", err
 	}
 
-	logger.SubSubLogYellow("The cookie form ID (after processing) is", cookieValue)
-	logger.SubSubLogYellow("The cookie form ID (after processing) must be", cookieMustHaveValue)
+	logger.Yellow(logger.SubSubInfo, strings.Join([]string{"The cookie form ID (after processing) is", cookieValue}, ""))
+	logger.Yellow(logger.SubSubInfo, strings.Join([]string{"The cookie form ID (after processing) must be", cookieMustHaveValue}, ""))
 
 	if cookieValue != cookieMustHaveValue {
 		return "", errors.New("the Form Cookie is incorrect")
@@ -233,7 +242,7 @@ func checkFormCookie(w http.ResponseWriter, r *http.Request, cookieName, cookieM
 		MaxAge: -1,
 	}
 	http.SetCookie(w, deleteCookie)
-	logger.SubSubLogYellow("Временная сессия формы удалена")
+	logger.Yellow(logger.SubSubInfo, "Временная сессия формы удалена")
 
 	return cookieMustHaveValue, nil
 }
@@ -274,4 +283,36 @@ func GetPost(ctx context.Context, db *mongo.Database, id primitive.ObjectID) (*m
 		return nil, err
 	}
 	return &p, nil
+}
+
+// Модель данных для параметров окружения
+type EnvironmentSettings struct {
+	Port         string `env:"PORT"`
+	MongoAddress string `env:"MONGO_ADDR"`
+}
+
+func (e *EnvironmentSettings) load() {
+	t := reflect.TypeOf(*e)        // объект для работы с типами
+	v := reflect.ValueOf(e).Elem() // объект для работы со значениями
+
+	numberOfFields := t.NumField() // вынимаем размер структуры
+	logger.SubInfo.Println("Количество полей в структуре:", strconv.Itoa(numberOfFields))
+
+	var field, tag string // временные переменные для цикла обработки параметров окружения ниже
+
+	for i := 0; i < numberOfFields; i++ {
+		field = t.Field(i).Name // имя поля
+		logger.SubInfo.Println("Текущее название поля в структуре EnvironmentSettings:", field)
+		tag = t.Field(i).Tag.Get("env") // значение тега env
+		logger.SubInfo.Println("Переменная окружения:", tag)
+
+		envPar, ok := os.LookupEnv(tag)
+		if !ok {
+			logger.Red(logger.SubInfo, strings.Join([]string{"Ошибка чтения параметров окружения:", field}, ""))
+			os.Exit(1)
+		}
+		logger.SubInfo.Println("Значение:", envPar)
+
+		v.FieldByName(field).SetString(envPar)
+	}
 }

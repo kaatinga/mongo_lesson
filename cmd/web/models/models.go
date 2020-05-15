@@ -46,7 +46,7 @@ func (data *ViewData) SetError(status uint16, err error) {
 		data.Error = err.Error()
 
 		// выводим ошибку в лог
-		logger.SubLogRed(err.Error())
+		logger.Red(logger.SubInfo,err.Error())
 	}
 }
 
@@ -69,7 +69,7 @@ func (data *ViewData) Render(w http.ResponseWriter) {
 		}
 
 		w.WriteHeader(int(data.Status)) // Добавляем в заголовок сообщение об ошибке
-		logger.Subsublog("The code is not 200, the status code is", strconv.Itoa(int((*data).Status)))
+		logger.SubSubInfo.Println("The code is not 200, the status code is", strconv.Itoa(int((*data).Status)))
 	} else {
 		data.Status = 200
 	}
@@ -85,13 +85,13 @@ func (data *ViewData) Render(w http.ResponseWriter) {
 		data.Template = filepath.Join("..", "ui", "html", "index.html") // дефолтный контент
 	}
 
-	logger.SubLog("Template was used:", (*data).Template)
+	logger.SubInfo.Println("Template was used:", (*data).Template)
 
 	tmpl, err = template.ParseFiles(layout, authBlock, (*data).Template)
 
 	if err != nil {
 		// Вываливаем в лог кучу хлама для анализа. Нужно переписать и выводить в файл.
-		logger.SubLogRed(err.Error())
+		logger.Red(logger.SubInfo,err.Error())
 		// Возвращаем ошибку пользователю
 		http.Error(w, http.StatusText(500), 500)
 		return
@@ -99,12 +99,12 @@ func (data *ViewData) Render(w http.ResponseWriter) {
 
 	err = tmpl.ExecuteTemplate(w, "base", data)
 	if err != nil {
-		logger.SubLogRed(err.Error())
+		logger.Red(logger.SubInfo,err.Error())
 		http.Error(w, http.StatusText(500), 500)
 		return
 	}
 
-	logger.Subsublog("Ошибки при формировании страницы по шаблону не обнаружено") // если ошибки нет
+	logger.SubSubInfo.Println("Ошибки при формировании страницы по шаблону не обнаружено") // если ошибки нет
 }
 
 // MenuData - Модель данных ссылки на страницу
@@ -129,7 +129,7 @@ type HandlerData struct {
 // Exist checks existence in the database
 func (hd *HandlerData) Exist(id primitive.ObjectID) (bool, error) {
 
-	logger.Subsublog("Checking existence of an item in the database...")
+	logger.SubSubInfo.Println("Checking existence of an item in the database...")
 
 	post := Post{
 		Mongo: Mongo{ID: id},
@@ -142,7 +142,7 @@ func (hd *HandlerData) Exist(id primitive.ObjectID) (bool, error) {
 		return false, err
 	}
 
-	logger.Subsublog("найдено:", strconv.Itoa(int(count)))
+	logger.SubSubInfo.Println("найдено:", strconv.Itoa(int(count)))
 
 	if count == 0 {
 		return false, nil

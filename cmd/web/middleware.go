@@ -34,7 +34,7 @@ func (m *Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		r.Body = http.MaxBytesReader(w, r.Body, 10000)
 		err := r.ParseForm()
 		if err != nil {
-			logger.SubLogRed("POST data is exceeded the limit")
+			logger.Red(logger.SubInfo,"POST data is exceeded the limit")
 			http.Error(w, http.StatusText(400), 400)
 			return
 		}

@@ -38,12 +38,12 @@ func InitPage(db *mongo.Database, ctx context.Context) Adapter {
 					value := url.QueryEscape(hd.FormValue)
 
 					if hd.WhereToRedirect == "" || value == "" {
-						logger.SubSubLogRed("Ошибка! Значения пустые")
+						logger.Red(logger.SubSubInfo, "Ошибка! Значения пустые")
 						hd.Data.SetError(500, nil)
 						hd.Data.Render(w)
 					}
 
-					logger.SubSubLogGreen("Time to redirect!")
+					logger.Green(logger.SubSubInfo,"Time to redirect!")
 
 					setFormCookie(w, hd.FormID, value)
 					urlToRedirect := strings.Join([]string{"/", hd.WhereToRedirect, "/", hd.FormID, "/", value}, "")
@@ -52,7 +52,7 @@ func InitPage(db *mongo.Database, ctx context.Context) Adapter {
 
 				case !hd.NoRender: // на случай если файлы хэндлятся, проверяем
 
-					logger.SubSubLogGreen("Time to render!")
+				logger.Green(logger.SubSubInfo,"Time to render!")
 					hd.Data.Render(w)
 
 				}
@@ -78,7 +78,7 @@ func InitPage(db *mongo.Database, ctx context.Context) Adapter {
 				ctx := context.WithValue(r.Context(), "hd", &hd)
 				next(w, r.WithContext(ctx), actions)
 			} else {
-				logger.SubSubLogYellow("Следующий хэндлер исключён")
+				logger.Yellow(logger.SubSubInfo,"Следующий хэндлер исключён")
 			}
 		}
 	}
@@ -86,7 +86,7 @@ func InitPage(db *mongo.Database, ctx context.Context) Adapter {
 
 // routes
 func (m *Middleware) SetUpHandlers() {
-	logger.SubLog("Setting up handlers...")
+	logger.SubInfo.Println("Setting up handlers...")
 
 	// swagger хандлер
 	m.router.HandlerFunc("GET", "/swagger/*filepath", httpSwagger.Handler(httpSwagger.URL("/swagger.json")))

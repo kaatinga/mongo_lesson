@@ -27,8 +27,8 @@ func SwaggerJSON(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 }
 
 // Welcome is the homepage of the blog
-// @Description shows a welcome page
-// @Tags homepage
+// @Description A sample af a GET request
+// @Tags API
 // @Success 200 {string} string
 // @Failure 500 {string} string
 // @Router / [get]
@@ -44,11 +44,12 @@ func Welcome(_ http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 // == Blog handlers ==
 
 // BlogForm shows the blog post form in case of updating or creating a blog post
-// @Description shows the blog post form
-// @Tags blog
+// @Description A test API request
+// @Tags API
 // @Success 200 {string} string
+// @Failure 400 {string} string
 // @Failure 500 {string} string
-// @Router /post/ [get]
+// @Router /post/ [POST]
 func BlogForm(w http.ResponseWriter, r *http.Request, actions httprouter.Params) {
 
 	var (
@@ -105,7 +106,7 @@ func ProcessPost(w http.ResponseWriter, r *http.Request, actions httprouter.Para
 
 	action := actions.ByName("action")
 	if action == "update" {
-		logger.SubLog("Updating a post...")
+		logger.SubInfo.Println("Updating a post...")
 
 		hd.Data.Title = editPost
 
@@ -137,7 +138,7 @@ func ProcessPost(w http.ResponseWriter, r *http.Request, actions httprouter.Para
 			return
 		}
 	} else {
-		logger.SubLog("Creating a post...")
+		logger.SubInfo.Println("Creating a post...")
 
 		// проверяем есть ли кука для этого запроса
 		_, err = checkFormCookie(w, r, "addPost", "ok")
@@ -219,7 +220,7 @@ func ProcessPost(w http.ResponseWriter, r *http.Request, actions httprouter.Para
 func DeletePost(w http.ResponseWriter, r *http.Request, actions httprouter.Params) {
 	hd := r.Context().Value("hd").(*models.HandlerData)
 
-	logger.SubLog("Deleting a blog post...")
+	logger.SubInfo.Println("Deleting a blog post...")
 	hd.Data.Title = "Удаление записи в блоге"
 
 	postID, err := primitive.ObjectIDFromHex(actions.ByName("id"))
@@ -301,7 +302,7 @@ type PostErrors struct {
 func ListPosts(_ http.ResponseWriter, r *http.Request, action httprouter.Params) {
 	hd := r.Context().Value("hd").(*models.HandlerData)
 
-	logger.SubLog("Post list is requested")
+	logger.SubInfo.Println("Post list is requested")
 
 	var err error
 	var postList PostList
