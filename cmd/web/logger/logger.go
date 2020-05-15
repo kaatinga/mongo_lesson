@@ -1,44 +1,45 @@
 package logger
 
 import (
+	"github.com/fatih/color"
+	"io"
 	"log"
-	"strings"
 )
 
-func SubLog(values ...string) {
-	var logString string
-	logString = strings.Join(values, " ")
+var (
+	Info       *log.Logger
+	SubInfo    *log.Logger
+	SubSubInfo *log.Logger
+)
 
-	log.Println("└", logString)
+func LoggerInit(infoHandle io.Writer) {
+
+	log.SetOutput(infoHandle)
+
+	Info = log.New(infoHandle,
+		"", 0)
+
+	SubInfo = log.New(infoHandle,
+		" └ ", 0)
+
+	SubSubInfo = log.New(infoHandle,
+		"   └ ", 0)
 }
 
-func SubLogRed(values ...string) {
-	var logString string
-	logString = strings.Join(values, " ")
-	SubLog(logString)
+func Yellow(logger *log.Logger, text string) {
+	color.Set(color.FgHiYellow)
+	logger.Println(text)
+	color.Unset()
 }
 
-func SubSubLogYellow(values ...string) {
-	var logString string
-	logString = strings.Join(values, " ")
-	Subsublog(logString)
+func Green(logger *log.Logger, text string) {
+	color.Set(color.FgHiGreen)
+	logger.Println(text)
+	color.Unset()
 }
 
-func SubSubLogRed(values ...string) {
-	var logString string
-	logString = strings.Join(values, " ")
-	Subsublog(logString)
-}
-
-func SubSubLogGreen(values ...string) {
-	var logString string
-	logString = strings.Join(values, " ")
-	Subsublog(logString)
-}
-
-func Subsublog(values ...string) {
-	var logString string
-	logString = strings.Join(values, " ")
-
-	log.Println("  └", logString)
+func Red(logger *log.Logger, text string) {
+	color.Set(color.FgHiRed)
+	logger.Println(text)
+	color.Unset()
 }
