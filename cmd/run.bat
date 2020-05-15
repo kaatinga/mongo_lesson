@@ -10,4 +10,6 @@ swag init
 cd ..
 go build -ldflags "-X 'main.compileDate=%datestr%'" web/main.go web/log.go web/handlers.go web/middleware.go web/routers.go web/db.go
 
+SET MONGO_ADDR=mongodb://localhost:27017
+SET PORT=3333
 main
